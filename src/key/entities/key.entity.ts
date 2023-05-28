@@ -11,10 +11,10 @@ export class KeyEntity implements Key {
    */
   name: string;
 
-  /**
-   * Key user id
-   */
-  userId: string | null;
+  // /**
+  //  * Key user id
+  //  */
+  // userId: string | null;
 
   /**
    * Key created date

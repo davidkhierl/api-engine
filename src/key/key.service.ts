@@ -1,26 +1,37 @@
+import { PaginationOptions } from '@/common/dto/pagination-options.dto';
+import { CreateKeyDto } from '@/key/dto/create-key.dto';
+import { UpdateKeyDto } from '@/key/dto/update-key.dto';
+import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CreateKeyDto } from './dto/create-key.dto';
-import { UpdateKeyDto } from './dto/update-key.dto';
 
 @Injectable()
 export class KeyService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createKeyDto: CreateKeyDto) {
-    return 'This action adds a new key';
+    return this.prisma.key.create({ data: { name: createKeyDto.name } });
   }
 
-  findAll() {
-    return `This action returns all key`;
+  findAll(options?: PaginationOptions) {
+    return this.prisma.key.findMany({
+      skip: options.skip,
+      take: options.take,
+      orderBy: { name: 'asc' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} key`;
+  findOne(id: string) {
+    return this.prisma.key.findUniqueOrThrow({ where: { id } });
   }
 
-  update(id: number, updateKeyDto: UpdateKeyDto) {
-    return `This action updates a #${id} key`;
+  update(id: string, updateKeyDto: UpdateKeyDto) {
+    return this.prisma.key.update({
+      where: { id },
+      data: { name: updateKeyDto.name },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} key`;
+  remove(id: string) {
+    return this.prisma.key.delete({ where: { id } });
   }
 }
