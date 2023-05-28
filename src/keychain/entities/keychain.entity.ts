@@ -1,6 +1,6 @@
-import { Key } from '@prisma/client';
+import { Keychain } from '@prisma/client';
 
-export class KeyEntity implements Key {
+export class KeychainEntity implements Keychain {
   /**
    * Key ID
    */

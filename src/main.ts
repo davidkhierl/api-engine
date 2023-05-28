@@ -43,7 +43,7 @@ async function bootstrap() {
     .setDescription('API Engine')
     .setVersion('1.0')
     .addTag('Default')
-    .addTag('Keys')
+    .addTag('Keychains')
     .addServer('http://localhost:{port}', 'API Engine', {
       protocol: {
         enum: ['http', 'https'],

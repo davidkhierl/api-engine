@@ -1,9 +1,10 @@
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
+import { AuthModule } from '@/auth/auth.module';
+import { KeychainModule } from '@/keychain/keychain.module';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { KeyModule } from './key/key.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { KeyModule } from './key/key.module';
       isGlobal: true,
     }),
     PrismaModule,
-    KeyModule,
+    KeychainModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

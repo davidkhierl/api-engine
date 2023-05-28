@@ -1,8 +1,8 @@
-import { KeyEntity } from '@/key/entities/key.entity';
+import { KeychainEntity } from '@/keychain/entities/keychain.entity';
 import { PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateKeyDto extends PickType(KeyEntity, ['name']) {
+export class CreateKeychainDto extends PickType(KeychainEntity, ['name']) {
   @IsString()
   @IsNotEmpty()
   name: string;
