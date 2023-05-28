@@ -15,6 +15,11 @@ model User {
   name  String
   email String
   keys  Key[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Key {
@@ -22,4 +27,9 @@ model Key {
   name   String
   User   User?   @relation(fields: [userId], references: [id])
   userId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("keys")
 }
