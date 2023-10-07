@@ -1,42 +1,35 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
-import { CreateKeychainDto } from '@/keychain/dto/create-keychain.dto';
-import { UpdateKeychainDto } from '@/keychain/dto/update-keychain.dto';
+import { KeyEntity } from '@/key/entities/key.entity';
 import { KeychainEntity } from '@/keychain/entities/keychain.entity';
-import { KeychainService } from '@/keychain/keychain.service';
 import {
   Body,
   Controller,
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { CreateKeychainDto } from './dto/create-keychain.dto';
+import { UpdateKeychainDto } from './dto/update-keychain.dto';
+import { KeychainService } from './keychain.service';
 
 @ApiTags('Keychains')
 @Controller('keychains')
 export class KeychainController {
-  constructor(private readonly keyService: KeychainService) {}
+  constructor(private readonly keychainService: KeychainService) {}
 
-  /**
-   * Create a user key
-   * @param createKeychainDto {CreateKeychainDto}
-   */
   @Post()
   @ApiCreatedResponse({
     description: 'Created keychain',
     type: KeychainEntity,
   })
   create(@Body() createKeychainDto: CreateKeychainDto) {
-    return this.keyService.create(createKeychainDto);
+    return this.keychainService.create(createKeychainDto);
   }
 
-  /**
-   * Find all keychains
-   */
   @Get()
   @ApiOkResponse({
     description: 'Keychains',
@@ -44,49 +37,49 @@ export class KeychainController {
     isArray: true,
   })
   findAll(@Query() paginationOptions: PaginationOptions) {
-    return this.keyService.findAll(paginationOptions);
+    return this.keychainService.findAll(paginationOptions);
   }
 
-  /**
-   * Find keychain
-   * @param id {string}
-   */
   @Get(':id')
   @ApiOkResponse({
     description: 'Keychain',
     type: KeychainEntity,
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.keyService.findOne(id);
+  findOne(@Param('id') id: string) {
+    return this.keychainService.findOne(id);
   }
 
-  /**
-   * Update keychain
-   * @param id {string}
-   * @param updateKeychainDto {UpdateKeychainDto}
-   */
   @Patch(':id')
   @ApiOkResponse({
     description: 'Updated keychain',
     type: KeychainEntity,
   })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
     @Body() updateKeychainDto: UpdateKeychainDto,
   ) {
-    return this.keyService.update(id, updateKeychainDto);
+    return this.keychainService.update(id, updateKeychainDto);
   }
 
-  /**
-   * Delete keychain
-   * @param id {string}
-   */
   @Delete(':id')
   @ApiOkResponse({
     description: 'Deleted keychain',
     type: KeychainEntity,
   })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.keyService.remove(id);
+  remove(@Param('id') id: string) {
+    return this.keychainService.remove(id);
+  }
+
+  @Get(':id/keys')
+  @ApiOkResponse({
+    description: 'Keychain keys',
+    type: KeyEntity,
+    isArray: true,
+  })
+  findAllKeys(
+    @Query() paginationOptions: PaginationOptions,
+    @Param('id') id: string,
+  ) {
+    return this.keychainService.findAllKeys(id, paginationOptions);
   }
 }

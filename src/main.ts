@@ -1,7 +1,6 @@
 import { AppModule } from '@/app.module';
 import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
 import { PrismaClientExceptionFilter } from '@/prisma/prisma-client-exception.filter';
-import { PrismaService } from '@/prisma/prisma.service';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
@@ -30,12 +29,6 @@ async function bootstrap() {
   );
 
   /* -------------------------------------------------------------------------- */
-  /*                                   prisma                                   */
-  /* -------------------------------------------------------------------------- */
-  const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
-
-  /* -------------------------------------------------------------------------- */
   /*                                   swagger                                  */
   /* -------------------------------------------------------------------------- */
   const swaggerConfig = new DocumentBuilder()
@@ -43,8 +36,9 @@ async function bootstrap() {
     .setDescription('API Engine')
     .setVersion('1.0')
     .addTag('Default')
-    .addTag('Keychains')
     .addTag('Users')
+    .addTag('Keychains')
+    .addTag('Keys')
     .addServer('http://localhost:{port}', 'API Engine', {
       protocol: {
         enum: ['http', 'https'],

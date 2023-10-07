@@ -1,4 +1,4 @@
-import { CreateKeychainDto } from '@/keychain/dto/create-keychain.dto';
 import { PartialType } from '@nestjs/swagger';
+import { CreateKeychainDto } from './create-keychain.dto';
 
 export class UpdateKeychainDto extends PartialType(CreateKeychainDto) {}

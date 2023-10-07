@@ -1,28 +1,30 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Keychain } from '@prisma/client';
 
 export class KeychainEntity implements Keychain {
   /**
-   * Key ID
+   * Keychain ID
    */
+  @ApiProperty()
   id: string;
-
   /**
-   * Key name
+   * Keychain name
    */
+  @ApiProperty()
   name: string;
-
-  // /**
-  //  * Key user id
-  //  */
-  // userId: string | null;
-
   /**
-   * Key created date
+   * Keychain description
    */
-  createdAt: Date;
-
+  @ApiProperty({ required: false, nullable: true })
+  description: string | null;
   /**
-   * Key updated date
+   * Keychain created date
    */
-  updatedAt: Date;
+  @ApiProperty({ required: false })
+  created_at: Date;
+  /**
+   * Keychain updated date
+   */
+  @ApiProperty({ required: false })
+  updated_at: Date;
 }

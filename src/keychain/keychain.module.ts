@@ -1,9 +1,10 @@
-import { KeychainController } from '@/keychain/keychain.controller';
-import { KeychainService } from '@/keychain/keychain.service';
+import { KeyService } from '@/key/key.service';
 import { Module } from '@nestjs/common';
+import { KeychainController } from './keychain.controller';
+import { KeychainService } from './keychain.service';
 
 @Module({
   controllers: [KeychainController],
-  providers: [KeychainService],
+  providers: [KeychainService, KeyService],
 })
 export class KeychainModule {}

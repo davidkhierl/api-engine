@@ -1,19 +1,23 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
-import { CreateKeychainDto } from '@/keychain/dto/create-keychain.dto';
-import { UpdateKeychainDto } from '@/keychain/dto/update-keychain.dto';
+import { KeyService } from '@/key/key.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { CreateKeychainDto } from './dto/create-keychain.dto';
+import { UpdateKeychainDto } from './dto/update-keychain.dto';
 
 @Injectable()
 export class KeychainService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly keyService: KeyService,
+  ) {}
 
-  create(createKeyDto: CreateKeychainDto) {
-    return this.prisma.keychain.create({ data: { name: createKeyDto.name } });
+  create(createKeychainDto: CreateKeychainDto) {
+    return this.prismaService.keychain.create({ data: createKeychainDto });
   }
 
   findAll(options?: PaginationOptions) {
-    return this.prisma.keychain.findMany({
+    return this.prismaService.keychain.findMany({
       skip: options.skip,
       take: options.take,
       orderBy: { name: 'asc' },
@@ -21,17 +25,21 @@ export class KeychainService {
   }
 
   findOne(id: string) {
-    return this.prisma.keychain.findUniqueOrThrow({ where: { id } });
+    return this.prismaService.keychain.findUniqueOrThrow({ where: { id } });
   }
 
-  update(id: string, updateKeyDto: UpdateKeychainDto) {
-    return this.prisma.keychain.update({
+  update(id: string, updateKeychainDto: UpdateKeychainDto) {
+    return this.prismaService.keychain.update({
       where: { id },
-      data: { name: updateKeyDto.name },
+      data: updateKeychainDto,
     });
   }
 
   remove(id: string) {
-    return this.prisma.keychain.delete({ where: { id } });
+    return this.prismaService.keychain.delete({ where: { id } });
+  }
+
+  findAllKeys(id: string, options?: PaginationOptions) {
+    return this.keyService.findAllByKeychain(id, options);
   }
 }

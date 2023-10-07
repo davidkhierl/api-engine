@@ -1,17 +1,17 @@
+import { KeyController } from '@/key/key.controller';
+import { KeyService } from '@/key/key.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { KeychainController } from './keychain.controller';
-import { KeychainService } from './keychain.service';
 
 describe('KeychainController', () => {
-  let controller: KeychainController;
+  let controller: KeyController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [KeychainController],
-      providers: [KeychainService],
+      controllers: [KeyController],
+      providers: [KeyService],
     }).compile();
 
-    controller = module.get<KeychainController>(KeychainController);
+    controller = module.get<KeyController>(KeyController);
   });
 
   it('should be defined', () => {
