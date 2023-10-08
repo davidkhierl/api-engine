@@ -34,7 +34,7 @@ model Keychain {
 
 model Key {
   id            String   @id @default(uuid())
-  api_key       String
+  api_key       String   @unique
   name          String?
   description   String?
   request_count Int      @default(0)

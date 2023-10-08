@@ -8,9 +8,9 @@ import { Injectable } from '@nestjs/common';
 export class KeyService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createKeyDto: CreateKeyDto) {
+  create(keychain_id: string, createKeyDto: CreateKeyDto) {
     return this.prisma.key.create({
-      data: createKeyDto,
+      data: { ...createKeyDto, keychain_id },
     });
   }
 
@@ -35,14 +35,5 @@ export class KeyService {
 
   remove(id: string) {
     return this.prisma.key.delete({ where: { id } });
-  }
-
-  findAllByKeychain(keychain_id: string, options?: PaginationOptions) {
-    return this.prisma.key.findMany({
-      where: { keychain_id },
-      skip: options.skip,
-      take: options.take,
-      orderBy: { name: 'asc' },
-    });
   }
 }

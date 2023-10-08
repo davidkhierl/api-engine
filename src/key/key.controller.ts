@@ -1,6 +1,5 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 
-import { CreateKeyDto } from '@/key/dto/create-key.dto';
 import { UpdateKeyDto } from '@/key/dto/update-key.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
 import { KeyService } from '@/key/key.service';
@@ -12,10 +11,9 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
-  Post,
   Query,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Keys')
 @Controller('keys')
@@ -26,14 +24,14 @@ export class KeyController {
    * Create key
    * @param createKeyDto {CreateKeyDto}
    */
-  @Post()
-  @ApiCreatedResponse({
-    description: 'Created key',
-    type: KeyEntity,
-  })
-  create(@Body() createKeyDto: CreateKeyDto) {
-    return this.keyService.create(createKeyDto);
-  }
+  // @Post()
+  // @ApiCreatedResponse({
+  //   description: 'Created key',
+  //   type: KeyEntity,
+  // })
+  // create(@Body() createKeyDto: CreateKeyDto) {
+  //   return this.keyService.create(createKeyDto);
+  // }
 
   /**
    * Find all keys

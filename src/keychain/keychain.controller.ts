@@ -1,4 +1,6 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
+import { CreateKeyDto } from '@/key/dto/create-key.dto';
+import { UpdateKeyDto } from '@/key/dto/update-key.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
 import { KeychainEntity } from '@/keychain/entities/keychain.entity';
 import {
@@ -40,46 +42,95 @@ export class KeychainController {
     return this.keychainService.findAll(paginationOptions);
   }
 
-  @Get(':id')
+  @Get(':keychainId')
   @ApiOkResponse({
     description: 'Keychain',
     type: KeychainEntity,
   })
-  findOne(@Param('id') id: string) {
-    return this.keychainService.findOne(id);
+  findOne(@Param('keychainId') keychainId: string) {
+    return this.keychainService.findOne(keychainId);
   }
 
-  @Patch(':id')
+  @Patch(':keychainId')
   @ApiOkResponse({
     description: 'Updated keychain',
     type: KeychainEntity,
   })
   update(
-    @Param('id') id: string,
+    @Param('keychainId') keychainId: string,
     @Body() updateKeychainDto: UpdateKeychainDto,
   ) {
-    return this.keychainService.update(id, updateKeychainDto);
+    return this.keychainService.update(keychainId, updateKeychainDto);
   }
 
-  @Delete(':id')
+  @Delete(':keychainId')
   @ApiOkResponse({
     description: 'Deleted keychain',
     type: KeychainEntity,
   })
-  remove(@Param('id') id: string) {
-    return this.keychainService.remove(id);
+  remove(@Param('keychainId') keychainId: string) {
+    return this.keychainService.remove(keychainId);
   }
 
-  @Get(':id/keys')
+  @Post(':keychainId/keys')
+  @ApiCreatedResponse({
+    description: 'Created key',
+    type: KeyEntity,
+  })
+  createKey(
+    @Param('keychainId') keychainId: string,
+    @Body() createKeyDto: CreateKeyDto,
+  ) {
+    return this.keychainService.createKey(keychainId, createKeyDto);
+  }
+
+  @Get(':keychainId/keys')
   @ApiOkResponse({
     description: 'Keychain keys',
     type: KeyEntity,
     isArray: true,
   })
   findAllKeys(
+    @Param('keychainId') keychainId: string,
     @Query() paginationOptions: PaginationOptions,
-    @Param('id') id: string,
   ) {
-    return this.keychainService.findAllKeys(id, paginationOptions);
+    return this.keychainService.findAllKeys(keychainId, paginationOptions);
+  }
+
+  @Get(':keychainId/keys/:keyId')
+  @ApiOkResponse({
+    description: 'Key',
+    type: KeyEntity,
+  })
+  findOneKey(
+    @Param('keychainId') keychainId: string,
+    @Param('keyId') keyId: string,
+  ) {
+    return this.keychainService.findKey(keychainId, keyId);
+  }
+
+  @Patch(':keychainId/keys/:keyId')
+  @ApiOkResponse({
+    description: 'Updated key',
+    type: KeyEntity,
+  })
+  updateKey(
+    @Param('keychainId') keychainId: string,
+    @Param('keyId') keyId: string,
+    @Body() updateKeyDto: UpdateKeyDto,
+  ) {
+    return this.keychainService.updateKey(keychainId, keyId, updateKeyDto);
+  }
+
+  @Delete(':keychainId/keys/:keyId')
+  @ApiOkResponse({
+    description: 'Deleted key',
+    type: KeyEntity,
+  })
+  removeKey(
+    @Param('keychainId') keychainId: string,
+    @Param('keyId') keyId: string,
+  ) {
+    return this.keychainService.removeKey(keychainId, keyId);
   }
 }

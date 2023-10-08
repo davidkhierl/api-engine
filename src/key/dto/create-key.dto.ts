@@ -5,7 +5,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
 export class CreateKeyDto {
@@ -51,11 +50,11 @@ export class CreateKeyDto {
   @IsOptional()
   @ApiProperty()
   enabled?: boolean;
-  /**
-   * Keychain id
-   */
-  @IsUUID()
-  @IsNotEmpty()
-  @ApiProperty()
-  keychain_id: string;
+  // /**
+  //  * Keychain id
+  //  */
+  // @IsUUID()
+  // @IsNotEmpty()
+  // @ApiProperty()
+  // keychain_id: string;
 }
