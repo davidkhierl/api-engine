@@ -8,12 +8,18 @@ import { Injectable } from '@nestjs/common';
 export class KeyService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(keychain_id: string, createKeyDto: CreateKeyDto) {
+  /**
+   * Create key
+   */
+  create(createKeyDto: CreateKeyDto) {
     return this.prisma.key.create({
-      data: { ...createKeyDto, keychain_id },
+      data: createKeyDto,
     });
   }
 
+  /**
+   * Find all keys
+   */
   findAll(options?: PaginationOptions) {
     return this.prisma.key.findMany({
       skip: options.skip,
@@ -22,10 +28,16 @@ export class KeyService {
     });
   }
 
+  /**
+   * Find key
+   */
   findOne(id: string) {
     return this.prisma.key.findUniqueOrThrow({ where: { id } });
   }
 
+  /**
+   * Update key
+   */
   update(id: string, updateKeyDto: UpdateKeyDto) {
     return this.prisma.key.update({
       where: { id },
@@ -33,6 +45,9 @@ export class KeyService {
     });
   }
 
+  /**
+   * Remove key
+   */
   remove(id: string) {
     return this.prisma.key.delete({ where: { id } });
   }

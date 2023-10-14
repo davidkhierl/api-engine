@@ -1,5 +1,8 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 
+import { Roles } from '@/auth/decorators/roles.decorators';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { CreateKeyDto } from '@/key/dto/create-key.dto';
 import { UpdateKeyDto } from '@/key/dto/update-key.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
 import { KeyService } from '@/key/key.service';
@@ -11,81 +14,80 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
-@ApiTags('Keys')
 @Controller('keys')
+@ApiTags('Keys')
+@Roles(UserRole.ADMIN)
+@UseGuards(JwtAuthGuard)
 export class KeyController {
   constructor(private readonly keyService: KeyService) {}
 
   /**
    * Create key
-   * @param createKeyDto {CreateKeyDto}
    */
-  // @Post()
-  // @ApiCreatedResponse({
-  //   description: 'Created key',
-  //   type: KeyEntity,
-  // })
-  // create(@Body() createKeyDto: CreateKeyDto) {
-  //   return this.keyService.create(createKeyDto);
-  // }
+  @Post()
+  @ApiCreatedResponse({
+    description: 'Created key',
+    type: KeyEntity,
+  })
+  create(@Body() createKeyDto: CreateKeyDto): Promise<KeyEntity> {
+    return this.keyService.create(createKeyDto);
+  }
 
   /**
-   * Find all keys
+   * Get all keys
    */
   @Get()
   @ApiOkResponse({
     description: 'Keys',
     type: KeyEntity,
-    isArray: true,
   })
-  findAll(@Query() paginationOptions: PaginationOptions) {
+  findAll(@Query() paginationOptions: PaginationOptions): Promise<KeyEntity[]> {
     return this.keyService.findAll(paginationOptions);
   }
 
   /**
-   * Find key
-   * @param id {string}
+   * Get key
    */
-  @Get(':id')
+  @Get(':keyId')
   @ApiOkResponse({
     description: 'Key',
     type: KeyEntity,
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.keyService.findOne(id);
+  findOne(@Param('keyId', ParseUUIDPipe) keyId: string): Promise<KeyEntity> {
+    return this.keyService.findOne(keyId);
   }
 
   /**
    * Update key
-   * @param id {string}
-   * @param updateKeyDto {UpdateKeyDto}
    */
-  @Patch(':id')
+  @Patch(':keyId')
   @ApiOkResponse({
     description: 'Updated key',
     type: KeyEntity,
   })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('keyId', ParseUUIDPipe) keyId: string,
     @Body() updateKeyDto: UpdateKeyDto,
-  ) {
-    return this.keyService.update(id, updateKeyDto);
+  ): Promise<KeyEntity> {
+    return this.keyService.update(keyId, updateKeyDto);
   }
 
   /**
    * Delete key
-   * @param id {string}
    */
-  @Delete(':id')
+  @Delete(':keyId')
   @ApiOkResponse({
     description: 'Deleted key',
     type: KeyEntity,
   })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.keyService.remove(id);
+  remove(@Param('keyId', ParseUUIDPipe) keyId: string): Promise<KeyEntity> {
+    return this.keyService.remove(keyId);
   }
 }

@@ -39,16 +39,8 @@ async function bootstrap() {
     .addTag('Users')
     .addTag('Keychains')
     .addTag('Keys')
-    .addServer('http://localhost:{port}', 'API Engine', {
-      protocol: {
-        enum: ['http', 'https'],
-        default: 'http',
-      },
-      port: {
-        enum: [port],
-        default: port,
-      },
-    })
+    .addServer('http://localhost:4000', 'API Engine')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

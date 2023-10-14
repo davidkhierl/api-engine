@@ -1,19 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateKeychainDto {
   /**
    * Keychain name
+   * @example  "My keychain"
    */
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
   name: string;
   /**
    * Keychain description
+   * @example "My project keychain"
    */
   @IsString()
+  @IsNotEmpty()
   @IsOptional()
-  @ApiProperty()
   description?: string;
 }
