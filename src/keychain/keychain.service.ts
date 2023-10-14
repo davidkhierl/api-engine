@@ -1,6 +1,4 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
-import { CreateKeychainKeyDto } from '@/keychain/dto/create-keychain-key.dto';
-import { UpdateKeychainKeyDto } from '@/keychain/dto/update-keychain-key.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CreateKeychainDto } from './dto/create-keychain.dto';
@@ -13,34 +11,44 @@ export class KeychainService {
   /**
    * Create keychain
    */
-  create(createKeychainDto: CreateKeychainDto) {
-    return this.prismaService.keychain.create({ data: createKeychainDto });
+  create(user_id: string, createKeychainDto: CreateKeychainDto) {
+    return this.prismaService.keychain.create({
+      data: { ...createKeychainDto, user_id },
+    });
   }
 
   /**
    * Find all keychains
    */
-  findAll(options?: PaginationOptions) {
+  findAll(user_id: string, paginationOptions?: PaginationOptions) {
     return this.prismaService.keychain.findMany({
-      skip: options.skip,
-      take: options.take,
-      orderBy: { name: 'asc' },
+      where: {
+        user_id,
+      },
+      skip: paginationOptions.skip,
+      take: paginationOptions.take,
+      orderBy: { created_at: 'asc' },
     });
   }
 
   /**
    * Find keychain
    */
-  findOne(id: string) {
-    return this.prismaService.keychain.findUniqueOrThrow({ where: { id } });
+  findOne(id: string, user_id: string) {
+    return this.prismaService.keychain.findUniqueOrThrow({
+      where: {
+        id,
+        user_id,
+      },
+    });
   }
 
   /**
    * Update keychain
    */
-  update(id: string, updateKeychainDto: UpdateKeychainDto) {
+  update(id: string, user_id: string, updateKeychainDto: UpdateKeychainDto) {
     return this.prismaService.keychain.update({
-      where: { id },
+      where: { id, user_id },
       data: updateKeychainDto,
     });
   }
@@ -48,59 +56,7 @@ export class KeychainService {
   /**
    * Remove keychain
    */
-  remove(id: string) {
-    return this.prismaService.keychain.delete({ where: { id } });
-  }
-
-  /**
-   * Create keychain key
-   */
-  createKey(keychain_id: string, creatKeychainKeyDto: CreateKeychainKeyDto) {
-    return this.prismaService.key.create({
-      data: { ...creatKeychainKeyDto, keychain_id },
-    });
-  }
-
-  /**
-   * Find all keychain keys
-   */
-  findAllKeys(keychain_id: string, options?: PaginationOptions) {
-    return this.prismaService.key.findMany({
-      where: { keychain_id },
-      skip: options.skip,
-      take: options.take,
-    });
-  }
-
-  /**
-   * Find keychain key
-   */
-  findKey(keychain_id: string, key_id: string) {
-    return this.prismaService.key.findUniqueOrThrow({
-      where: { keychain_id, id: key_id },
-    });
-  }
-
-  /**
-   * Update a keychain key
-   */
-  updateKey(
-    keychain_id: string,
-    key_id: string,
-    updateKeychainKeyDto: UpdateKeychainKeyDto,
-  ) {
-    return this.prismaService.key.update({
-      where: { keychain_id, id: key_id },
-      data: updateKeychainKeyDto,
-    });
-  }
-
-  /**
-   * Remove keychain key
-   */
-  removeKey(keychain_id: string, key_id: string) {
-    return this.prismaService.key.delete({
-      where: { keychain_id, id: key_id },
-    });
+  remove(id: string, user_id: string) {
+    return this.prismaService.keychain.delete({ where: { id, user_id } });
   }
 }

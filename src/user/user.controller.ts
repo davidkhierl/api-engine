@@ -1,6 +1,7 @@
 import { Public } from '@/auth/decorators/public.decorators';
 import { Roles } from '@/auth/decorators/roles.decorators';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { RoleGuard } from '@/auth/guards/role.guard';
 import { User } from '@/common/decorators/user.decorator';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { UpdateUserDto } from '@/user/dto/update-user.dto';
@@ -25,7 +26,7 @@ import { UserRole } from '@prisma/client';
 @Controller('users')
 @ApiTags('Users')
 @UseInterceptors(ClassSerializerInterceptor)
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -1,15 +1,17 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { User } from '@/common/decorators/user.decorator';
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
-import { CreateKeychainKeyDto } from '@/keychain/dto/create-keychain-key.dto';
-import { UpdateKeychainKeyDto } from '@/keychain/dto/update-keychain-key.dto';
+import { KeyService } from '@/key/key.service';
 import { KeychainEntity } from '@/keychain/entities/keychain.entity';
+import { UserEntity } from '@/user/entities/user.entity';
 import {
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -24,7 +26,10 @@ import { KeychainService } from './keychain.service';
 @ApiTags('Keychains')
 @UseGuards(JwtAuthGuard)
 export class KeychainController {
-  constructor(private readonly keychainService: KeychainService) {}
+  constructor(
+    private readonly keychainService: KeychainService,
+    private readonly keyService: KeyService,
+  ) {}
 
   /**
    * Create keychain
@@ -35,9 +40,10 @@ export class KeychainController {
     type: KeychainEntity,
   })
   create(
+    @User() user: UserEntity,
     @Body() createKeychainDto: CreateKeychainDto,
   ): Promise<KeychainEntity> {
-    return this.keychainService.create(createKeychainDto);
+    return this.keychainService.create(user.id, createKeychainDto);
   }
 
   /**
@@ -50,9 +56,10 @@ export class KeychainController {
     isArray: true,
   })
   findAll(
+    @User() user: UserEntity,
     @Query() paginationOptions: PaginationOptions,
   ): Promise<KeychainEntity[]> {
-    return this.keychainService.findAll(paginationOptions);
+    return this.keychainService.findAll(user.id, paginationOptions);
   }
 
   /**
@@ -60,8 +67,32 @@ export class KeychainController {
    */
   @Get(':keychainId')
   @ApiOkResponse({ description: 'Keychain', type: KeychainEntity })
-  findOne(@Param('keychainId') keychainId: string): Promise<KeychainEntity> {
-    return this.keychainService.findOne(keychainId);
+  findOne(
+    @User() user: UserEntity,
+    @Param('keychainId', ParseUUIDPipe) keychainId: string,
+  ): Promise<KeychainEntity> {
+    return this.keychainService.findOne(keychainId, user.id);
+  }
+
+  /**
+   * Get keychain keys
+   */
+  @Get(':keychainId/keys')
+  @ApiOkResponse({
+    description: 'Keychain keys',
+    type: KeyEntity,
+    isArray: true,
+  })
+  findKeychainKeys(
+    @User() user: UserEntity,
+    @Param('keychainId', ParseUUIDPipe) keychainId: string,
+    @Query() paginationOptions: PaginationOptions,
+  ): Promise<KeyEntity[]> {
+    return this.keyService.findAllByKeychain(
+      user.id,
+      keychainId,
+      paginationOptions,
+    );
   }
 
   /**
@@ -70,10 +101,11 @@ export class KeychainController {
   @Patch(':keychainId')
   @ApiOkResponse({ description: 'Updated keychain', type: KeychainEntity })
   update(
-    @Param('keychainId') keychainId: string,
+    @User() user: UserEntity,
+    @Param('keychainId', ParseUUIDPipe) keychainId: string,
     @Body() updateKeychainDto: UpdateKeychainDto,
   ): Promise<KeychainEntity> {
-    return this.keychainService.update(keychainId, updateKeychainDto);
+    return this.keychainService.update(keychainId, user.id, updateKeychainDto);
   }
 
   /**
@@ -84,88 +116,10 @@ export class KeychainController {
     description: 'Deleted keychain',
     type: KeychainEntity,
   })
-  remove(@Param('keychainId') keychainId: string): Promise<KeychainEntity> {
-    return this.keychainService.remove(keychainId);
-  }
-
-  /**
-   * Create keychain key
-   */
-  @Post(':keychainId/keys')
-  @ApiCreatedResponse({
-    description: 'Created keychain key',
-    type: KeyEntity,
-  })
-  createKey(
-    @Param('keychainId') keychainId: string,
-    @Body() createKeychainKeyDto: CreateKeychainKeyDto,
-  ): Promise<KeyEntity> {
-    return this.keychainService.createKey(keychainId, createKeychainKeyDto);
-  }
-
-  /**
-   * Get all keychain keys
-   */
-  @Get(':keychainId/keys')
-  @ApiOkResponse({
-    description: 'Keychain keys',
-    type: KeyEntity,
-    isArray: true,
-  })
-  findAllKeys(
-    @Param('keychainId') keychainId: string,
-    @Query() paginationOptions: PaginationOptions,
-  ): Promise<KeyEntity[]> {
-    return this.keychainService.findAllKeys(keychainId, paginationOptions);
-  }
-
-  /**
-   * Get keychain key
-   */
-  @Get(':keychainId/keys/:keyId')
-  @ApiOkResponse({
-    description: 'Keychain Key',
-    type: KeyEntity,
-  })
-  findOneKey(
-    @Param('keychainId') keychainId: string,
-    @Param('keyId') keyId: string,
-  ): Promise<KeyEntity> {
-    return this.keychainService.findKey(keychainId, keyId);
-  }
-
-  /**
-   * Update a keychain key
-   */
-  @Patch(':keychainId/keys/:keyId')
-  @ApiOkResponse({
-    description: 'Updated keychain key',
-    type: KeyEntity,
-  })
-  updateKey(
-    @Param('keychainId') keychainId: string,
-    @Param('keyId') keyId: string,
-    @Body() updateKeychainKeyDto: UpdateKeychainKeyDto,
-  ): Promise<KeyEntity> {
-    return this.keychainService.updateKey(
-      keychainId,
-      keyId,
-      updateKeychainKeyDto,
-    );
-  }
-
-  /**
-   * Delete keychain key
-   */
-  @Delete(':keychainId/keys/:keyId')
-  @ApiOkResponse({
-    description: 'Deleted keychain key',
-    type: KeyEntity,
-  })
-  removeKey(
-    @Param('keychainId') keychainId: string,
-    @Param('keyId') keyId: string,
-  ): Promise<KeyEntity> {
-    return this.keychainService.removeKey(keychainId, keyId);
+  remove(
+    @User() user: UserEntity,
+    @Param('keychainId', ParseUUIDPipe) keychainId: string,
+  ): Promise<KeychainEntity> {
+    return this.keychainService.remove(keychainId, user.id);
   }
 }

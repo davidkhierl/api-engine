@@ -1,11 +1,12 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 
-import { Roles } from '@/auth/decorators/roles.decorators';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { User } from '@/common/decorators/user.decorator';
 import { CreateKeyDto } from '@/key/dto/create-key.dto';
 import { UpdateKeyDto } from '@/key/dto/update-key.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
 import { KeyService } from '@/key/key.service';
+import { UserEntity } from '@/user/entities/user.entity';
 import {
   Body,
   Controller,
@@ -19,11 +20,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
 
 @Controller('keys')
 @ApiTags('Keys')
-@Roles(UserRole.ADMIN)
 @UseGuards(JwtAuthGuard)
 export class KeyController {
   constructor(private readonly keyService: KeyService) {}
@@ -36,8 +35,11 @@ export class KeyController {
     description: 'Created key',
     type: KeyEntity,
   })
-  create(@Body() createKeyDto: CreateKeyDto): Promise<KeyEntity> {
-    return this.keyService.create(createKeyDto);
+  create(
+    @User() user: UserEntity,
+    @Body() createKeyDto: CreateKeyDto,
+  ): Promise<KeyEntity> {
+    return this.keyService.create(user.id, createKeyDto);
   }
 
   /**
@@ -48,8 +50,11 @@ export class KeyController {
     description: 'Keys',
     type: KeyEntity,
   })
-  findAll(@Query() paginationOptions: PaginationOptions): Promise<KeyEntity[]> {
-    return this.keyService.findAll(paginationOptions);
+  findAll(
+    @User() user: UserEntity,
+    @Query() paginationOptions: PaginationOptions,
+  ): Promise<KeyEntity[]> {
+    return this.keyService.findAll(user.id, paginationOptions);
   }
 
   /**
@@ -60,8 +65,11 @@ export class KeyController {
     description: 'Key',
     type: KeyEntity,
   })
-  findOne(@Param('keyId', ParseUUIDPipe) keyId: string): Promise<KeyEntity> {
-    return this.keyService.findOne(keyId);
+  findOne(
+    @User() user: UserEntity,
+    @Param('keyId', ParseUUIDPipe) keyId: string,
+  ): Promise<KeyEntity> {
+    return this.keyService.findOne(keyId, user.id);
   }
 
   /**
@@ -73,10 +81,11 @@ export class KeyController {
     type: KeyEntity,
   })
   update(
+    @User() user: UserEntity,
     @Param('keyId', ParseUUIDPipe) keyId: string,
     @Body() updateKeyDto: UpdateKeyDto,
   ): Promise<KeyEntity> {
-    return this.keyService.update(keyId, updateKeyDto);
+    return this.keyService.update(keyId, user.id, updateKeyDto);
   }
 
   /**
@@ -87,7 +96,10 @@ export class KeyController {
     description: 'Deleted key',
     type: KeyEntity,
   })
-  remove(@Param('keyId', ParseUUIDPipe) keyId: string): Promise<KeyEntity> {
-    return this.keyService.remove(keyId);
+  remove(
+    @User() user: UserEntity,
+    @Param('keyId', ParseUUIDPipe) keyId: string,
+  ): Promise<KeyEntity> {
+    return this.keyService.remove(keyId, user.id);
   }
 }
