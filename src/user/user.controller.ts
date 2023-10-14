@@ -49,7 +49,7 @@ export class UserController {
     description: 'Current user',
     type: UserEntity,
   })
-  currentUser(@User() currentUser: UserEntity): UserEntity {
+  current(@User() currentUser: UserEntity): UserEntity {
     return new UserEntity(currentUser);
   }
 
@@ -61,11 +61,25 @@ export class UserController {
     description: 'Updated current user',
     type: UserEntity,
   })
-  async updateCurrentUser(
+  async updateCurrent(
     @User() currentUser: UserEntity,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserEntity> {
     const user = await this.userService.update(currentUser.id, updateUserDto);
+
+    return new UserEntity(user);
+  }
+
+  /**
+   * Delete current user
+   */
+  @Delete('me')
+  @ApiOkResponse({
+    description: 'Deleted current user',
+    type: UserEntity,
+  })
+  async removeCurrent(@User() currentUser: UserEntity): Promise<UserEntity> {
+    const user = await this.userService.remove(currentUser.id);
 
     return new UserEntity(user);
   }
