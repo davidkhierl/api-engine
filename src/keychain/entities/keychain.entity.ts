@@ -27,4 +27,9 @@ export class KeychainEntity implements Keychain {
    * Keychain updated date
    */
   updated_at: Date;
+  /**
+   * User id
+   * @example 46a3d687-9380-4cc6-8fec-b67c0895b351
+   */
+  user_id: string;
 }

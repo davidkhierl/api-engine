@@ -16,13 +16,14 @@ enum UserRole {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            String     @id @default(uuid())
+  email         String     @unique
   name          String
   password_hash String
-  role          UserRole @default(USER)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  role          UserRole   @default(USER)
+  keychains     Keychain[]
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
 
   @@map("users")
 }
@@ -34,6 +35,9 @@ model Keychain {
   keys        Key[]
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+
+  user    User?   @relation(fields: [user_id], references: [id])
+  user_id String?
 
   @@map("keychains")
 }
