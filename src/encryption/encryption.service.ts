@@ -1,49 +1,41 @@
 import { KryptoService } from '@/krypto/krypto.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CreateEncryptionDto } from './dto/create-encryption.dto';
-import { UpdateEncryptionDto } from './dto/update-encryption.dto';
 
 @Injectable()
 export class EncryptionService {
-  constructor(private readonly kryptoService: KryptoService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly kryptoService: KryptoService,
+  ) {}
 
-  create(user_id?: string, createEncryptionDto?: CreateEncryptionDto) {
-    console.log(user_id, createEncryptionDto);
+  async create(user_id?: string) {
+    const { long, short, test } = this._createEncryptionKey();
+    const encryption = await this.prismaService.encryption.create({
+      data: { user_id, short, test },
+    });
+
+    return { long, ...encryption };
+  }
+
+  findOne(user_id: string) {
+    return this.prismaService.encryption.findUniqueOrThrow({
+      where: { user_id },
+    });
+  }
+
+  remove(user_id: string) {
+    return this.prismaService.encryption.delete({ where: { user_id } });
+  }
+
+  private _createEncryptionKey() {
     const key = this.kryptoService.generateKey();
-    const message = 'Hello World!';
-    const encrypted = this.kryptoService.encrypt(message, key);
-    const decrypted = this.kryptoService.decrypt(encrypted, key);
-    const destructured = this.kryptoService.destructureKey(key);
-    const rebuildKey = this.kryptoService.rebuildKey(
-      destructured.long,
-      destructured.short,
-    );
-    return {
+    const test = this.kryptoService.encrypt(
+      this.kryptoService.generateTestString(16),
       key,
-      message,
-      encrypted,
-      decrypted,
-      matched: message === decrypted,
-      destructured,
-      rebuildKey,
-      rebuildMatched: rebuildKey === key,
-    };
-  }
+    );
+    const { short, long } = this.kryptoService.destructureKey(key);
 
-  findAll() {
-    return `This action returns all encryption`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} encryption`;
-  }
-
-  update(id: number, updateEncryptionDto: UpdateEncryptionDto) {
-    console.log(updateEncryptionDto);
-    return `This action updates a #${id} encryption`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} encryption`;
+    return { long, short, test };
   }
 }

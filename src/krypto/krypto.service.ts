@@ -64,6 +64,10 @@ export class KryptoService {
     return this._formatKey(Buffer.from(key, 'base64'));
   }
 
+  generateTestString(size: number) {
+    return Crypto.randomBytes(size).toString('hex');
+  }
+
   private _encryptAesGcm(key: Uint8Array, message: string): AesCipher {
     const iv = Crypto.randomBytes(12);
     const cipher = Crypto.createCipheriv('aes-256-gcm', key, iv);

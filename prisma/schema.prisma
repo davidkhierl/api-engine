@@ -61,11 +61,11 @@ model Key {
 }
 
 model Encryption {
-  id          String   @id @default(uuid())
-  key_partial String
-  test        String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id         String   @id @default(uuid())
+  short      String
+  test       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String @unique

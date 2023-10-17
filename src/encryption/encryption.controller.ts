@@ -1,56 +1,44 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
+import { CreateEncryptionResponseDto } from '@/encryption/dto/create-encryption-response.dto';
+import { EncryptionEntity } from '@/encryption/entities/encryption.entity';
 import { UserEntity } from '@/user/entities/user.entity';
 import {
-  Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
-  Param,
-  Patch,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { CreateEncryptionDto } from './dto/create-encryption.dto';
-import { UpdateEncryptionDto } from './dto/update-encryption.dto';
 import { EncryptionService } from './encryption.service';
 
 @Controller('encryption')
 @ApiTags('Encryption')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class EncryptionController {
   constructor(private readonly encryptionService: EncryptionService) {}
 
   @Post()
-  @ApiCreatedResponse()
-  create(
-    @User() user: UserEntity,
-    @Body() createEncryptionDto: CreateEncryptionDto,
-  ) {
-    return this.encryptionService.create(user.id, createEncryptionDto);
+  @ApiCreatedResponse({
+    description: 'Created encryption key',
+    type: CreateEncryptionResponseDto,
+  })
+  create(@User() user: UserEntity): Promise<CreateEncryptionResponseDto> {
+    return this.encryptionService.create(user.id);
   }
 
   @Get()
-  findAll() {
-    return this.encryptionService.findAll();
+  async findOne(@User() user: UserEntity): Promise<EncryptionEntity> {
+    const encryption = await this.encryptionService.findOne(user.id);
+    return new EncryptionEntity(encryption);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.encryptionService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateEncryptionDto: UpdateEncryptionDto,
-  ) {
-    return this.encryptionService.update(+id, updateEncryptionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.encryptionService.remove(+id);
+  @Delete()
+  remove(@User() user: UserEntity): Promise<EncryptionEntity> {
+    return this.encryptionService.remove(user.id);
   }
 }

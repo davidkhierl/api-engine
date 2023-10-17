@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MinLength,
 } from 'class-validator';
 
 export class CreateKeyDto {
@@ -56,4 +57,7 @@ export class CreateKeyDto {
    */
   @IsUUID()
   keychain_id: string;
+  @IsString()
+  @MinLength(34)
+  long: string;
 }

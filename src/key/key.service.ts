@@ -1,18 +1,24 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 import { CreateKeyDto } from '@/key/dto/create-key.dto';
 import { UpdateKeyDto } from '@/key/dto/update-key.dto';
+import { KryptoService } from '@/krypto/krypto.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class KeyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly kryptoService: KryptoService,
+  ) {}
 
   /**
    * Create key
    */
   async create(user_id: string, createKeyDto: CreateKeyDto) {
-    const keychain = await this.prisma.keychain.findUnique({
+    const { long, api_key, ...rest } = createKeyDto;
+
+    const keychain = await this.prismaService.keychain.findUnique({
       where: {
         id: createKeyDto.keychain_id,
         user_id,
@@ -24,8 +30,15 @@ export class KeyService {
         `Keychain ${createKeyDto.keychain_id} not found`,
       );
 
-    return this.prisma.key.create({
-      data: createKeyDto,
+    const encryption = await this.prismaService.encryption.findUniqueOrThrow({
+      where: { user_id },
+    });
+
+    const key = this.kryptoService.rebuildKey(long, encryption.short);
+    const encrypted = this.kryptoService.encrypt(api_key, key);
+
+    return this.prismaService.key.create({
+      data: { api_key: encrypted, ...rest },
     });
   }
 
@@ -33,7 +46,7 @@ export class KeyService {
    * Find all keys
    */
   findAll(user_id: string, paginationOptions?: PaginationOptions) {
-    return this.prisma.key.findMany({
+    return this.prismaService.key.findMany({
       where: {
         keychain: {
           user_id,
@@ -53,7 +66,7 @@ export class KeyService {
     keychain_id: string,
     paginationOptions?: PaginationOptions,
   ) {
-    return this.prisma.key.findMany({
+    return this.prismaService.key.findMany({
       where: {
         keychain_id,
         keychain: {
@@ -70,7 +83,7 @@ export class KeyService {
    * Find key
    */
   findOne(id: string, user_id: string) {
-    return this.prisma.key.findUniqueOrThrow({
+    return this.prismaService.key.findUniqueOrThrow({
       where: { id, keychain: { user_id } },
     });
   }
@@ -79,7 +92,7 @@ export class KeyService {
    * Update key
    */
   update(id: string, user_id: string, updateKeyDto: UpdateKeyDto) {
-    return this.prisma.key.update({
+    return this.prismaService.key.update({
       where: { id, keychain: { user_id } },
       data: updateKeyDto,
     });
@@ -89,6 +102,8 @@ export class KeyService {
    * Remove key
    */
   remove(id: string, user_id: string) {
-    return this.prisma.key.delete({ where: { id, keychain: { user_id } } });
+    return this.prismaService.key.delete({
+      where: { id, keychain: { user_id } },
+    });
   }
 }
