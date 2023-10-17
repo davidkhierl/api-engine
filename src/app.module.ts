@@ -7,6 +7,8 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { UserModule } from '@/user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EncryptionModule } from './encryption/encryption.module';
+import { KryptoModule } from './krypto/krypto.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     KeychainModule,
     KeyModule,
+    KryptoModule,
+    EncryptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

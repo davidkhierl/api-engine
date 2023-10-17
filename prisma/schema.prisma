@@ -16,14 +16,15 @@ enum UserRole {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  email         String     @unique
+  id            String      @id @default(uuid())
+  email         String      @unique
   name          String
   password_hash String
-  role          UserRole   @default(USER)
+  role          UserRole    @default(USER)
   keychains     Keychain[]
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
+  encryption    Encryption?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
 
   @@map("users")
 }
@@ -57,4 +58,17 @@ model Key {
   keychain_id String
 
   @@map("keys")
+}
+
+model Encryption {
+  id          String   @id @default(uuid())
+  key_partial String
+  test        String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @unique
+
+  @@map("encryptions")
 }

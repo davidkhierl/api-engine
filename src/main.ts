@@ -37,6 +37,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('Default')
     .addTag('Users')
+    .addTag('Encryption')
     .addTag('Keychains')
     .addTag('Keys')
     .addServer('http://localhost:4000', 'API Engine')
