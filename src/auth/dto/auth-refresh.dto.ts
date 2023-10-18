@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthRefreshDto {
@@ -7,6 +6,5 @@ export class AuthRefreshDto {
    */
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
-  refresh_token: string;
+  access_token: string;
 }

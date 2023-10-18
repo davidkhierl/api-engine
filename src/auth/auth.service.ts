@@ -41,9 +41,10 @@ export class AuthService {
     };
   }
 
-  async refreshToken(jwt: string): Promise<AuthToken> {
-    const token = this.jwtService.verify<JwtPayload>(jwt, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+  async refreshToken(access_token: string): Promise<AuthToken> {
+    const token = this.jwtService.verify<JwtPayload>(access_token, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      ignoreExpiration: true,
     });
 
     return this.generateToken(token.sub, token.username);

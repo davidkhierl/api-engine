@@ -1,4 +1,5 @@
 import { AuthService } from '@/auth/auth.service';
+import { AuthRefreshDto } from '@/auth/dto/auth-refresh.dto';
 import { AuthResponseDto } from '@/auth/dto/auth-response.dto';
 import { AuthDto } from '@/auth/dto/auth.dto';
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh-auth.guard';
@@ -6,6 +7,7 @@ import { LocalAuthGuard } from '@/auth/guards/local-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
 import { UserEntity } from '@/user/entities/user.entity';
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
@@ -38,7 +40,9 @@ export class AuthController {
    */
   @Get('refresh')
   @UseGuards(JwtRefreshAuthGuard)
-  async refreshToken(@User() user: UserEntity): Promise<AuthResponseDto> {
-    return await this.authService.generateToken(user.id, user.email);
+  async refreshToken(
+    @Body() authRefreshDto: AuthRefreshDto,
+  ): Promise<AuthResponseDto> {
+    return await this.authService.refreshToken(authRefreshDto.access_token);
   }
 }
