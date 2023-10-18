@@ -1,3 +1,4 @@
+import { isProduction } from '@/shared/constants';
 import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
@@ -9,9 +10,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    // const message = exception.message.replace(/\n/g, '');
-
-    console.log(exception.message);
+    if (!isProduction) console.log(exception.message);
 
     switch (exception.code) {
       case 'P2002': {
