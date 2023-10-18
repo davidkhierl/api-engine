@@ -30,12 +30,7 @@ export class KeyService {
         `Keychain ${createKeyDto.keychain_id} not found`,
       );
 
-    const encryption = await this.prismaService.encryption.findUniqueOrThrow({
-      where: { user_id },
-    });
-
-    const key = this.kryptoService.rebuildKey(long, encryption.short);
-    const encrypted = this.kryptoService.encrypt(api_key, key);
+    const encrypted = await this._encryptProperty(api_key, long, user_id);
 
     return this.prismaService.key.create({
       data: { api_key: encrypted, ...rest },
@@ -48,27 +43,6 @@ export class KeyService {
   findAll(user_id: string, paginationOptions?: PaginationOptions) {
     return this.prismaService.key.findMany({
       where: {
-        keychain: {
-          user_id,
-        },
-      },
-      skip: paginationOptions.skip,
-      take: paginationOptions.take,
-      orderBy: { name: 'asc' },
-    });
-  }
-
-  /**
-   * Find all keychain keys
-   */
-  findAllByKeychain(
-    user_id: string,
-    keychain_id: string,
-    paginationOptions?: PaginationOptions,
-  ) {
-    return this.prismaService.key.findMany({
-      where: {
-        keychain_id,
         keychain: {
           user_id,
         },
@@ -105,5 +79,16 @@ export class KeyService {
     return this.prismaService.key.delete({
       where: { id, keychain: { user_id } },
     });
+  }
+
+  /**
+   * Encrypt property
+   */
+  async _encryptProperty(input: string, long: string, user_id: string) {
+    const encryption = await this.prismaService.encryption.findUniqueOrThrow({
+      where: { user_id },
+    });
+    const key = this.kryptoService.rebuildKey(long, encryption.short);
+    return this.kryptoService.encrypt(input, key);
   }
 }

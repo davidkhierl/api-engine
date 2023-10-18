@@ -32,6 +32,28 @@ export class KeychainService {
   }
 
   /**
+   * Find all keychain keys
+   */
+  async findAllKeychainKeys(
+    id: string,
+    user_id: string,
+    paginationOptions?: PaginationOptions,
+  ) {
+    const keychain = await this.prismaService.keychain.findUniqueOrThrow({
+      where: { id, user_id },
+      include: {
+        keys: {
+          skip: paginationOptions.skip,
+          take: paginationOptions.take,
+          orderBy: { created_at: 'asc' },
+        },
+      },
+    });
+
+    return keychain.keys;
+  }
+
+  /**
    * Find keychain
    */
   findOne(id: string, user_id: string) {

@@ -2,7 +2,6 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
 import { KeyEntity } from '@/key/entities/key.entity';
-import { KeyService } from '@/key/key.service';
 import { KeychainEntity } from '@/keychain/entities/keychain.entity';
 import { UserEntity } from '@/user/entities/user.entity';
 import {
@@ -26,10 +25,7 @@ import { KeychainService } from './keychain.service';
 @ApiTags('Keychains')
 @UseGuards(JwtAuthGuard)
 export class KeychainController {
-  constructor(
-    private readonly keychainService: KeychainService,
-    private readonly keyService: KeyService,
-  ) {}
+  constructor(private readonly keychainService: KeychainService) {}
 
   /**
    * Create keychain
@@ -88,9 +84,9 @@ export class KeychainController {
     @Param('keychainId', ParseUUIDPipe) keychainId: string,
     @Query() paginationOptions: PaginationOptions,
   ): Promise<KeyEntity[]> {
-    return this.keyService.findAllByKeychain(
-      user.id,
+    return this.keychainService.findAllKeychainKeys(
       keychainId,
+      user.id,
       paginationOptions,
     );
   }

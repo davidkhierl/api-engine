@@ -57,7 +57,12 @@ export class CreateKeyDto {
    */
   @IsUUID()
   keychain_id: string;
+  /**
+   * Encryption key partial
+   * @example 0NiCFheZf28B0DE04zRLjHpPbVWEVz0e6Z
+   */
   @IsString()
+  @IsNotEmpty()
   @MinLength(34)
   long: string;
 }
