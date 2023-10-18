@@ -8,8 +8,8 @@ export class KeyEntity implements Key {
    */
   id: string;
   /**
-   * API Key
-   * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+   * Encrypted API Key
+   * @example v1.aesgcm256.7e5c6df8.PSWgDYVu6IIhNou3.RcrLyyb73-IRoNoa287hqooyjwoaCgipc39_VFpl0Q==
    */
   api_key: string;
   /**
