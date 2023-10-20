@@ -23,10 +23,44 @@ model User {
   role          UserRole    @default(USER)
   keychains     Keychain[]
   encryption    Encryption?
+  tokens        Token[]
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
 
   @@map("users")
+}
+
+model Session {
+  sid      String   @id @db.VarChar()
+  sess     Json     @db.Json
+  expire   DateTime @db.Timestamp(6)
+  ip       String?
+  location String?
+  token    Token?
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("sessions")
+}
+
+enum TokenType {
+  REFRESH_TOKEN
+}
+
+model Token {
+  id             String    @id @default(uuid())
+  value          String
+  type           TokenType
+  used_at        DateTime?
+  invalidated_at DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    String
+  session    Session? @relation(fields: [session_id], references: [sid])
+  session_id String?  @unique @db.VarChar()
+
+  @@map("tokens")
 }
 
 model Keychain {

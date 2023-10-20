@@ -1,75 +1,1 @@
-import { AuthToken } from '@/auth/types/auth.types';
-import { JwtPayload } from '@/auth/types/jwt-payload';
-import { UserService } from '@/user/user.service';
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import * as argon2 from 'argon2';
-
-@Injectable()
-export class AuthService {
-  constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
-
-  async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findOneByEmail(email);
-
-    if (user) {
-      const passwordMatches = await argon2.verify(user.password_hash, password);
-      if (!passwordMatches) return null;
-
-      delete user.password_hash;
-
-      return user;
-    }
-
-    return null;
-  }
-
-  async generateToken(sub: string, username: string): Promise<AuthToken> {
-    const { access_token, at_expiry } = this._signAccessToken(sub, username);
-    const refresh_token = this._signRefreshToken(sub, username);
-
-    return {
-      access_token,
-      at_expiry,
-      refresh_token,
-    };
-  }
-
-  async refreshToken(access_token: string): Promise<AuthToken> {
-    const token = this.jwtService.verify<JwtPayload>(access_token, {
-      secret: this.configService.get<string>('JWT_SECRET'),
-      ignoreExpiration: true,
-    });
-
-    return this.generateToken(token.sub, token.username);
-  }
-
-  private _signAccessToken(
-    sub: string,
-    username: string,
-  ): Omit<AuthToken, 'refresh_token'> {
-    const payload = { sub, username };
-    const access_token = this.jwtService.sign(payload, {
-      expiresIn: '15m',
-      secret: this.configService.get<string>('JWT_SECRET'),
-    });
-
-    const at_expiry = this.jwtService.decode(access_token)['exp'];
-
-    return { access_token, at_expiry };
-  }
-
-  private _signRefreshToken(sub: string, username: string): string {
-    const payload = { sub, username };
-    return this.jwtService.sign(payload, {
-      expiresIn: '120d',
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-    });
-  }
-}
+import { AuthToken } from '@/auth/types/auth.types';import { PrismaService } from '@/prisma/prisma.service';import { ExpressSession } from '@/types/express-session/express-session.types';import { UserEntity } from '@/user/entities/user.entity';import { UserService } from '@/user/user.service';import { Injectable, InternalServerErrorException } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { JwtService } from '@nestjs/jwt';import { TokenType, User } from '@prisma/client';import argon2 from 'argon2';@Injectable()export class AuthService {  constructor(    private readonly userService: UserService,    private readonly jwtService: JwtService,    private readonly configService: ConfigService,    private readonly prismaService: PrismaService,  ) {}  async validateUser(email: string, password: string): Promise<User | null> {    const user = await this.userService.findOneByEmail(email);    if (user) {      const passwordMatches = await argon2.verify(user.password_hash, password);      if (!passwordMatches) return null;      delete user.password_hash;      return user;    }    return null;  }  async authorize(    user: UserEntity,    session: ExpressSession,    ip?: string,  ): Promise<AuthToken> {    const { access_token, refresh_token, at_expiry } =      await this._generateTokens(user.id, user.email);    session.refresh_token = refresh_token;    session.save(async (error) => {      if (error) throw new InternalServerErrorException();      await this.prismaService.session.update({        where: { sid: session.id },        data: { ip },      });      const refreshTokenHash = await argon2.hash(refresh_token);      await this.prismaService.token.upsert({        where: { session_id: session.id },        create: {          value: refreshTokenHash,          type: TokenType.REFRESH_TOKEN,          user_id: user.id,          session_id: session.id,        },        update: {          value: refreshTokenHash,        },      });    });    return { access_token, at_expiry };  }  async validateSessionToken(session: ExpressSession) {    const token = await this.prismaService.token.findUnique({      where: { session_id: session.id },    });    if (!token || !!token?.invalidated_at || !!token?.used_at) return false;    return await argon2.verify(token.value, session.refresh_token);  }  async refreshSessionToken(    user: UserEntity,    session: ExpressSession,    ip?: string,  ): Promise<AuthToken> {    await this.prismaService.token.update({      where: { session_id: session.id },      data: {        used_at: new Date(),        session: {          disconnect: true,        },      },      include: {        user: true,      },    });    const { access_token, refresh_token, at_expiry } =      await this._generateTokens(user.id, user.email);    session.refresh_token = refresh_token;    session.save(async (error) => {      if (error) throw new InternalServerErrorException();      await this.prismaService.session.update({        where: { sid: session.id },        data: { ip },      });      const refreshTokenHash = await argon2.hash(refresh_token);      await this.prismaService.token.create({        data: {          value: refreshTokenHash,          type: TokenType.REFRESH_TOKEN,          user_id: user.id,          session_id: session.id,        },      });    });    return { access_token, at_expiry };  }  private async _generateTokens(sub: string, username: string) {    const { access_token, at_expiry } = this._signAccessToken(sub, username);    const refresh_token = this._signRefreshToken(sub, username);    return {      access_token,      at_expiry,      refresh_token,    };  }  private _signAccessToken(sub: string, username: string): AuthToken {    const payload = { sub, username };    const access_token = this.jwtService.sign(payload, {      expiresIn: '15m',      secret: this.configService.get<string>('JWT_SECRET'),    });    const at_expiry = this.jwtService.decode(access_token)['exp'];    return { access_token, at_expiry };  }  private _signRefreshToken(sub: string, username: string): string {    const payload = { sub, username };    return this.jwtService.sign(payload, {      expiresIn: '120d',      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),    });  }}

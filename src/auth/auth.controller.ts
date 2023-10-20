@@ -1,17 +1,18 @@
 import { AuthService } from '@/auth/auth.service';
-import { AuthRefreshDto } from '@/auth/dto/auth-refresh.dto';
 import { AuthResponseDto } from '@/auth/dto/auth-response.dto';
 import { AuthDto } from '@/auth/dto/auth.dto';
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from '@/auth/guards/local-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
+import { ExpressSession } from '@/types/express-session/express-session.types';
 import { UserEntity } from '@/user/entities/user.entity';
 import {
-  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Ip,
   Post,
+  Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -31,8 +32,12 @@ export class AuthController {
     type: AuthDto,
   })
   @Post('login')
-  async login(@User() user: UserEntity): Promise<AuthResponseDto> {
-    return await this.authService.generateToken(user.id, user.email);
+  async login(
+    @User() user: UserEntity,
+    @Ip() ip: string,
+    @Session() session: ExpressSession,
+  ): Promise<AuthResponseDto> {
+    return this.authService.authorize(user, session, ip);
   }
 
   /**
@@ -41,8 +46,10 @@ export class AuthController {
   @Get('refresh')
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(
-    @Body() authRefreshDto: AuthRefreshDto,
+    @User() user: UserEntity,
+    @Ip() ip: string,
+    @Session() session: ExpressSession,
   ): Promise<AuthResponseDto> {
-    return await this.authService.refreshToken(authRefreshDto.access_token);
+    return this.authService.refreshSessionToken(user, session, ip);
   }
 }

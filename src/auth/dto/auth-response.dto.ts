@@ -13,9 +13,4 @@ export class AuthResponseDto implements AuthToken {
    * Access token expiration
    */
   at_expiry: number;
-
-  /**
-   * Refresh token
-   */
-  refresh_token: string;
 }

@@ -12,5 +12,5 @@ export interface AuthToken {
   /**
    * Refresh token
    */
-  refresh_token: string;
+  // refresh_token: string;
 }
