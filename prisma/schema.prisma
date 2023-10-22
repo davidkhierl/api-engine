@@ -68,7 +68,7 @@ model SessionToken {
   session    Session? @relation(fields: [session_id], references: [sid])
   session_id String?  @unique @db.VarChar()
 
-  @@map("tokens")
+  @@map("session_token")
 }
 
 model Keychain {
