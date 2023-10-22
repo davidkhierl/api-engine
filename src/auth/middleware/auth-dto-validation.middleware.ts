@@ -1,4 +1,4 @@
-import { AuthDto } from '@/auth/dto/auth.dto';
+import { AuthLoginDto } from '@/auth/dto/auth-login.dto';
 import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
 import {
   Injectable,
@@ -12,7 +12,7 @@ import { NextFunction, Request, Response } from 'express';
 export class AuthDtoValidationMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const body = req.body;
-    const auth = new AuthDto();
+    const auth = new AuthLoginDto();
     Object.keys(body).forEach((key) => {
       auth[key] = body[key];
     });

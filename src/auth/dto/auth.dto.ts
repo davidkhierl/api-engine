@@ -1,21 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { AuthToken } from '@/auth/types/auth.types';
 
-export class AuthDto {
+/**
+ * Auth response object
+ */
+export class AuthDto implements AuthToken {
   /**
-   * Login email
+   * Access token
    */
-  @IsString()
-  @IsNotEmpty()
-  @IsEmail()
-  @ApiProperty()
-  email: string;
+  access_token: string;
 
   /**
-   * Login password
+   * Access token expiration
    */
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  password: string;
+  at_expiry: number;
 }

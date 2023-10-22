@@ -16,27 +16,25 @@ enum UserRole {
 }
 
 model User {
-  id            String      @id @default(uuid())
-  email         String      @unique
-  name          String
-  password_hash String
-  role          UserRole    @default(USER)
-  keychains     Keychain[]
-  encryption    Encryption?
-  tokens        Token[]
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+  id             String         @id @default(uuid())
+  email          String         @unique
+  name           String
+  password_hash  String
+  role           UserRole       @default(USER)
+  keychains      Keychain[]
+  encryption     Encryption?
+  session_tokens SessionToken[]
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
 
   @@map("users")
 }
 
 model Session {
-  sid      String   @id @db.VarChar()
-  sess     Json     @db.Json
-  expire   DateTime @db.Timestamp(6)
-  ip       String?
-  location String?
-  token    Token?
+  sid           String        @id @db.VarChar()
+  sess          Json          @db.Json
+  expire        DateTime      @db.Timestamp(6)
+  session_token SessionToken?
 
   @@index([expire], map: "IDX_session_expire")
   @@map("sessions")
@@ -46,14 +44,24 @@ enum TokenType {
   REFRESH_TOKEN
 }
 
-model Token {
-  id             String    @id @default(uuid())
-  value          String
-  type           TokenType
+enum SessionTokenStatus {
+  ACTIVE
+  EXPIRED
+  INVALIDATED_BY_USER
+  LOGOUT
+  REFRESHED
+}
+
+model SessionToken {
+  id             String             @id @default(uuid())
+  token          String
+  status         SessionTokenStatus @default(ACTIVE)
+  ip             String?
+  location       String?
   used_at        DateTime?
   invalidated_at DateTime?
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
 
   user       User     @relation(fields: [user_id], references: [id])
   user_id    String

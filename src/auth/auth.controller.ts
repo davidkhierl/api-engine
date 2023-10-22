@@ -1,43 +1,60 @@
 import { AuthService } from '@/auth/auth.service';
-import { AuthResponseDto } from '@/auth/dto/auth-response.dto';
+import { AuthLoginDto } from '@/auth/dto/auth-login.dto';
 import { AuthDto } from '@/auth/dto/auth.dto';
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from '@/auth/guards/local-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
 import { ExpressSession } from '@/types/express-session/express-session.types';
 import { UserEntity } from '@/user/entities/user.entity';
+
 import {
   ClassSerializerInterceptor,
   Controller,
   Get,
-  Ip,
+  HttpCode,
   Post,
+  Res,
   Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
+import { SessionTokenStatus } from '@prisma/client';
+import { Response } from 'express';
 
-@UseInterceptors(ClassSerializerInterceptor)
-@ApiTags('Auth')
 @Controller('auth')
+@ApiTags('Auth')
+@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
    * Login user
    */
+  @Post('login')
   @UseGuards(LocalAuthGuard)
   @ApiBody({
-    type: AuthDto,
+    type: AuthLoginDto,
   })
-  @Post('login')
   async login(
     @User() user: UserEntity,
-    @Ip() ip: string,
     @Session() session: ExpressSession,
-  ): Promise<AuthResponseDto> {
-    return this.authService.authorize(user, session, ip);
+  ): Promise<AuthDto> {
+    return this.authService.authorize(user, session);
+  }
+
+  @Post('logout')
+  @ApiNoContentResponse()
+  @HttpCode(204)
+  async logout(
+    @Session() session: ExpressSession,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.invalidateSession(session, {
+      status: SessionTokenStatus.LOGOUT,
+    });
+
+    res.clearCookie('sid');
   }
 
   /**
@@ -47,9 +64,8 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(
     @User() user: UserEntity,
-    @Ip() ip: string,
     @Session() session: ExpressSession,
-  ): Promise<AuthResponseDto> {
-    return this.authService.refreshSessionToken(user, session, ip);
+  ): Promise<AuthDto> {
+    return this.authService.refreshSessionToken(user, session);
   }
 }

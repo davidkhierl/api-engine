@@ -8,9 +8,11 @@ export interface AuthToken {
    * Access token expiration
    */
   at_expiry: number;
+}
 
+export interface AuthTokenWithRefreshToken extends AuthToken {
   /**
    * Refresh token
    */
-  // refresh_token: string;
+  refresh_token: string;
 }
