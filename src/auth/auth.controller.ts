@@ -39,8 +39,22 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthDto> {
-    return this.authService.authorize(user, session);
+    const auth = await this.authService.authorize(user, session);
+
+    res.cookie('access_token', auth.access_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+    res.cookie('at_expiry', auth.at_expiry, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    return auth;
   }
 
   @Post('logout')
@@ -55,6 +69,8 @@ export class AuthController {
     });
 
     res.clearCookie('sid');
+    res.clearCookie('access_token');
+    res.clearCookie('at_expiry');
   }
 
   /**
@@ -65,7 +81,20 @@ export class AuthController {
   async refreshToken(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthDto> {
-    return this.authService.refreshSessionToken(user, session);
+    const auth = await this.authService.refreshSessionToken(user, session);
+    res.cookie('access_token', auth.access_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+    res.cookie('at_expiry', auth.at_expiry, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    return auth;
   }
 }
