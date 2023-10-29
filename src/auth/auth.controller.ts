@@ -3,6 +3,7 @@ import { AuthService } from '@/auth/auth.service';
 import {
   ClassSerializerInterceptor,
   Controller,
+  Get,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -12,6 +13,13 @@ import { ApiTags } from '@nestjs/swagger';
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  /**
+   * Get auth user
+   */
+  @Get()
+  async getAuthenticatedAppForUser() {}
+
   //
   // /**
   //  * Login user

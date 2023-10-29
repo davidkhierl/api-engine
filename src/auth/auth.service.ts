@@ -1,10 +1,10 @@
-import { AuthLoginDto } from '@/auth/dto/auth-login.dto';
 import { FirebaseService } from '@/firebase/firebase.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly firebaseService: FirebaseService) {}
+
   //
   // /**
   //  * Validate user credentials.
@@ -26,9 +26,8 @@ export class AuthService {
   //   return null;
   // }
 
-  async signIn(authLoginDto: AuthLoginDto) {
-    this.firebaseService.auth.createCustomToken('3Jw9WestwdUgFvxdsoCZwMqQH6Lo');
-  }
+  async getAuth() {}
+
   //
   // /**
   //  * Authorize session and generate tokens.
