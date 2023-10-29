@@ -1,12 +1,10 @@
 import { AppModule } from '@/app.module';
 import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
-import { PrismaClientExceptionFilter } from '@/prisma/prisma-client-exception.filter';
+import { FirebaseAuthErrorInterceptor } from '@/firebase/firebase-auth-error.interceptor';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as session from 'express-session';
-import connectPgSimple = require('connect-pg-simple');
 
 async function bootstrap() {
   /* -------------------------------------------------------------------------- */
@@ -19,9 +17,6 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number | undefined>('PORT') ?? 3000;
 
-  const { httpAdapter } = app.get(HttpAdapterHost);
-
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -31,6 +26,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.useGlobalInterceptors(new FirebaseAuthErrorInterceptor());
 
   /* -------------------------------------------------------------------------- */
   /*                                   swagger                                  */
@@ -54,28 +50,6 @@ async function bootstrap() {
   /* -------------------------------------------------------------------------- */
   /*                                   express                                  */
   /* -------------------------------------------------------------------------- */
-
-  const pgSession = connectPgSimple(session);
-
-  app.use(
-    session({
-      store: new pgSession({
-        tableName: 'sessions',
-        disableTouch: true,
-      }),
-      name: 'sid',
-      secret: configService.get<string>('SESSION_SECRET'),
-      resave: false,
-      cookie: {
-        maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 120d
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-      },
-      saveUninitialized: false,
-    }),
-  );
-
   await app.listen(port ?? 3000);
 }
 

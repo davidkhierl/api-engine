@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Keychain } from '@prisma/client';
 
-export class KeychainEntity implements Keychain {
+export class KeychainEntity {
   /**
    * Keychain ID
    * @example 97146ddb-de2f-4283-9470-0a56e723f521

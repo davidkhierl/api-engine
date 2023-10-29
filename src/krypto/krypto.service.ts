@@ -25,6 +25,11 @@ export class KryptoService {
     return this._formatKey(key);
   }
 
+  /**
+   * Encrypt a string with a key
+   * @param input {string}
+   * @param key {KryptoKey | ParsedKryptoKey}
+   */
   encrypt(input: string, key: KryptoKey | ParsedKryptoKey): KryptoEncryptedKey {
     if (typeof key === 'string') {
       key = this._parseKey(key);
@@ -36,6 +41,11 @@ export class KryptoService {
     return this._encodeEncryptedString(key.fingerprint, iv, ciphertext);
   }
 
+  /**
+   * Decrypt a string with a key
+   * @param input {string}
+   * @param key {KryptoKey | ParsedKryptoKey}
+   */
   decrypt(input: KryptoEncryptedKey, key: KryptoKey | ParsedKryptoKey): string {
     const match = input.match(this._kryptoEncryptedKeyStringRegex);
     if (!match) {
@@ -55,15 +65,32 @@ export class KryptoService {
     });
   }
 
+  /**
+   * Destructure a key to two parts
+   * @param key
+   *
+   * @returns {KryptoKeyDestructured} - KryptoKeyDestructured
+   */
   destructureKey(key: KryptoKey): KryptoKeyDestructured {
     return { long: key.slice(13, 47), short: key.slice(47) };
   }
 
+  /**
+   * Rebuild the destructured keys
+   * @param long
+   * @param short
+   *
+   * @returns {KryptoKey} - KryptoKey
+   */
   rebuildKey(long: string, short: string): KryptoKey {
     const key = long.concat(short);
     return this._formatKey(Buffer.from(key, 'base64'));
   }
 
+  /**
+   * Generate random string
+   * @param {number} size - number of bytes to generate
+   */
   generateTestString(size: number) {
     return Crypto.randomBytes(size).toString('hex');
   }

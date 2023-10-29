@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Key } from '@prisma/client';
 
-export class KeyEntity implements Key {
+export class KeyEntity {
   /**
    * Key id
    * @example 9131a8b6-5a54-43ce-898b-98cff6ff7ccf

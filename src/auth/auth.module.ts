@@ -4,6 +4,7 @@ import { AuthDtoValidationMiddleware } from '@/auth/middleware/auth-dto-validati
 import { JwtRefreshStrategy } from '@/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '@/auth/strategies/jwt.strategy';
 import { LocalStrategy } from '@/auth/strategies/local.strategy';
+import { FirebaseModule } from '@/firebase/firebase.module';
 import { UserModule } from '@/user/user.module';
 import {
   MiddlewareConsumer,
@@ -15,7 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [UserModule, PassportModule, JwtModule.register({})],
+  imports: [UserModule, PassportModule, JwtModule.register({}), FirebaseModule],
   providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   controllers: [AuthController],
   exports: [AuthService],
