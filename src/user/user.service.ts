@@ -1,7 +1,9 @@
+import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { UpdateUserDto } from '@/user/dto/update-user.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon2 from 'argon2';
 
 @Injectable()
@@ -12,11 +14,27 @@ export class UserService {
    * Create user
    */
   async create(createUserDto: CreateUserDto) {
-    const { password, name, email } = createUserDto;
+    const { password, displayName, email } = createUserDto;
 
     const password_hash = await argon2.hash(password);
 
-    return this.prisma.user.create({ data: { name, email, password_hash } });
+    try {
+      return await this.prisma.user.create({
+        data: { displayName, email, password_hash },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002')
+          throw new BadUserInputException([
+            {
+              property: 'email',
+              value: email,
+              constraints: { emailAlreadyInUser: 'Email already in use' },
+            },
+          ]);
+        else throw error;
+      } else throw new InternalServerErrorException(error);
+    }
   }
 
   /**

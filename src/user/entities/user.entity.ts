@@ -13,10 +13,10 @@ export class UserEntity implements User {
    */
   id: string;
   /**
-   * User name
+   * User display name
    * @example "John doe"
    */
-  name: string;
+  displayName: string | null;
   /**
    * User email
    * @example johndoe@email.com

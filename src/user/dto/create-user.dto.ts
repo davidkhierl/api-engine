@@ -1,14 +1,14 @@
 import { Password } from '@/shared/decorators/password.decorator';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
   /**
-   * User name
+   * User display name
    * @example "John Doe"
    */
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  displayName?: string;
   /**
    * User email
    * @example johndoe@email.com

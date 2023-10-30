@@ -5,6 +5,10 @@ import { AuthToken } from '@/auth/types/auth.types';
  */
 export class AuthDto implements AuthToken {
   /**
+   * User data
+   */
+  // user: UserEntity;
+  /**
    * Access token
    */
   access_token: string;

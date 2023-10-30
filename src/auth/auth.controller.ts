@@ -13,14 +13,12 @@ import {
   Get,
   HttpCode,
   Post,
-  Res,
   Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import { SessionTokenStatus } from '@prisma/client';
-import { Response } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -39,38 +37,17 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
-    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthDto> {
-    const auth = await this.authService.authorize(user, session);
-
-    res.cookie('access_token', auth.access_token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-    res.cookie('at_expiry', auth.at_expiry, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-
-    return auth;
+    return await this.authService.authorize(user, session);
   }
 
   @Post('logout')
   @ApiNoContentResponse()
   @HttpCode(204)
-  async logout(
-    @Session() session: ExpressSession,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Session() session: ExpressSession) {
     await this.authService.invalidateSession(session, {
       status: SessionTokenStatus.LOGOUT,
     });
-
-    res.clearCookie('sid');
-    res.clearCookie('access_token');
-    res.clearCookie('at_expiry');
   }
 
   /**
@@ -81,20 +58,7 @@ export class AuthController {
   async refreshToken(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
-    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthDto> {
-    const auth = await this.authService.refreshSessionToken(user, session);
-    res.cookie('access_token', auth.access_token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-    res.cookie('at_expiry', auth.at_expiry, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-
-    return auth;
+    return await this.authService.refreshSessionToken(user, session);
   }
 }
