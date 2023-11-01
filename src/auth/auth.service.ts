@@ -2,7 +2,6 @@ import { AuthToken, AuthTokenWithRefreshToken } from '@/auth/types/auth.types';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ExpressSession } from '@/types/express-session/express-session.types';
 import { UserEntity } from '@/user/entities/user.entity';
-import { UserService } from '@/user/user.service';
 import {
   Injectable,
   InternalServerErrorException,
@@ -17,7 +16,6 @@ import * as dayjs from 'dayjs';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
@@ -29,7 +27,7 @@ export class AuthService {
    * @param  password
    */
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findOneByEmail(email);
+    const user = await this.prismaService.user.findUnique({ where: { email } });
 
     if (user) {
       const passwordMatches = await argon2.verify(user.password_hash, password);
@@ -194,7 +192,7 @@ export class AuthService {
   private _signAccessToken(sub: string, username: string): AuthToken {
     const payload = { sub, username };
     const access_token = this.jwtService.sign(payload, {
-      expiresIn: '30s',
+      expiresIn: '1h',
       secret: this.configService.get<string>('JWT_SECRET'),
     });
 

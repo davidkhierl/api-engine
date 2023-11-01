@@ -4,7 +4,6 @@ import { AuthDtoValidationMiddleware } from '@/auth/middleware/auth-dto-validati
 import { JwtRefreshStrategy } from '@/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '@/auth/strategies/jwt.strategy';
 import { LocalStrategy } from '@/auth/strategies/local.strategy';
-import { UserModule } from '@/user/user.module';
 import {
   MiddlewareConsumer,
   Module,
@@ -15,7 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [UserModule, PassportModule, JwtModule.register({})],
+  imports: [PassportModule, JwtModule.register({})],
   providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   controllers: [AuthController],
   exports: [AuthService],

@@ -1,8 +1,11 @@
+import { AuthService } from '@/auth/auth.service';
 import { Public } from '@/auth/decorators/public.decorators';
 import { Roles } from '@/auth/decorators/roles.decorators';
+import { AuthResponseDto } from '@/auth/dto/auth.response.dto';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { RoleGuard } from '@/auth/guards/role.guard';
 import { User } from '@/common/decorators/user.decorator';
+import { ExpressSession } from '@/types/express-session/express-session.types';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { UpdateUserDto } from '@/user/dto/update-user.dto';
 import { UserEntity } from '@/user/entities/user.entity';
@@ -17,6 +20,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -28,18 +32,24 @@ import { UserRole } from '@prisma/client';
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   /**
    * Create user
    */
   @Post()
   @Public()
-  @ApiCreatedResponse({ type: UserEntity, description: 'Created user' })
-  async create(@Body() createUserDto: CreateUserDto) {
+  @ApiCreatedResponse({ type: AuthResponseDto, description: 'Created user' })
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @Session() session: ExpressSession,
+  ): Promise<AuthResponseDto> {
     const user = await this.userService.create(createUserDto);
-
-    return new UserEntity(user);
+    const tokens = await this.authService.authorize(user, session);
+    return { user: new UserEntity(user), ...tokens };
   }
 
   /**

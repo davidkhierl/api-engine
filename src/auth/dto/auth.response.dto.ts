@@ -1,13 +1,14 @@
 import { AuthToken } from '@/auth/types/auth.types';
+import { UserEntity } from '@/user/entities/user.entity';
 
 /**
  * Auth response object
  */
-export class AuthDto implements AuthToken {
+export class AuthResponseDto implements AuthToken {
   /**
    * User data
    */
-  // user: UserEntity;
+  user: UserEntity;
   /**
    * Access token
    */

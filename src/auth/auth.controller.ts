@@ -1,12 +1,12 @@
 import { AuthService } from '@/auth/auth.service';
 import { AuthLoginDto } from '@/auth/dto/auth-login.dto';
-import { AuthDto } from '@/auth/dto/auth.dto';
+import { AuthRefreshResponseDto } from '@/auth/dto/auth-refresh-response.dto';
+import { AuthResponseDto } from '@/auth/dto/auth.response.dto';
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from '@/auth/guards/local-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
 import { ExpressSession } from '@/types/express-session/express-session.types';
 import { UserEntity } from '@/user/entities/user.entity';
-
 import {
   ClassSerializerInterceptor,
   Controller,
@@ -37,10 +37,16 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
-  ): Promise<AuthDto> {
-    return await this.authService.authorize(user, session);
+  ): Promise<AuthResponseDto> {
+    const tokens = await this.authService.authorize(user, session);
+
+    return { user, ...tokens };
   }
 
+  /**
+   * Logout user, deletes session
+   * @param session
+   */
   @Post('logout')
   @ApiNoContentResponse()
   @HttpCode(204)
@@ -58,7 +64,7 @@ export class AuthController {
   async refreshToken(
     @User() user: UserEntity,
     @Session() session: ExpressSession,
-  ): Promise<AuthDto> {
+  ): Promise<AuthRefreshResponseDto> {
     return await this.authService.refreshSessionToken(user, session);
   }
 }
