@@ -28,6 +28,8 @@
 
 ## Installation
 
+##install pnpm from here: https://pnpm.io/installation
+
 ```bash
 $ pnpm install
 ```
@@ -35,6 +37,11 @@ $ pnpm install
 ## Running the app
 
 ```bash
+
+# prepare prisma DB
+pnpm prisma db push
+pnpm prisma generate
+
 # development
 $ pnpm run start
 
@@ -56,6 +63,7 @@ $ pnpm run test:e2e
 
 # test coverage
 $ pnpm run test:cov
+
 ```
 
 ## Support
