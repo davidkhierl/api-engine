@@ -13,15 +13,20 @@ export class UserEntity implements User {
    */
   id: string;
   /**
+   * User email
+   * @example johndoe@email.com
+   */
+  email: string;
+  /**
    * User display name
    * @example "John doe"
    */
   displayName: string | null;
   /**
-   * User email
-   * @example johndoe@email.com
+   * User avatar
+   * @example http://localhost:3000/images/avatar-default-1.png
    */
-  email: string;
+  avatarUrl: string | null;
   /**
    * User password hash
    */

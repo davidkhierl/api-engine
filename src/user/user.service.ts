@@ -5,6 +5,7 @@ import { UpdateUserDto } from '@/user/dto/update-user.dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon2 from 'argon2';
+import { sample } from 'lodash';
 
 @Injectable()
 export class UserService {
@@ -18,9 +19,16 @@ export class UserService {
 
     const password_hash = await argon2.hash(password);
 
+    const avatarUrl = sample([
+      '/avatar-default-1.png',
+      '/avatar-default-2.png',
+      '/avatar-default-3.png',
+      '/avatar-default-4.png',
+    ]);
+
     try {
       return await this.prisma.user.create({
-        data: { displayName, email, password_hash },
+        data: { email, displayName, avatarUrl, password_hash },
       });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
