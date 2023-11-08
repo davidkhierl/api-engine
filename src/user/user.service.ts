@@ -20,10 +20,10 @@ export class UserService {
     const password_hash = await argon2.hash(password);
 
     const avatarUrl = sample([
-      '/avatar-default-1.png',
-      '/avatar-default-2.png',
-      '/avatar-default-3.png',
-      '/avatar-default-4.png',
+      'images/avatar-default-1.png',
+      'images/avatar-default-2.png',
+      'images/avatar-default-3.png',
+      'images/avatar-default-4.png',
     ]);
 
     try {
