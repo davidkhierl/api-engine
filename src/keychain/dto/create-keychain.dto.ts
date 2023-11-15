@@ -13,7 +13,6 @@ export class CreateKeychainDto {
    * @example "My project keychain"
    */
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   description?: string;
 }

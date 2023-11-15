@@ -1,4 +1,5 @@
 import { PaginationOptions } from '@/common/dto/pagination-options.dto';
+import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
 import { CreateKeyDto } from '@/key/dto/create-key.dto';
 import { UpdateKeyDto } from '@/key/dto/update-key.dto';
 import { KryptoService } from '@/krypto/krypto.service';
@@ -84,11 +85,20 @@ export class KeyService {
   /**
    * Encrypt property
    */
-  async _encryptProperty(input: string, long: string, user_id: string) {
+  private async _encryptProperty(input: string, long: string, user_id: string) {
     const encryption = await this.prismaService.encryption.findUniqueOrThrow({
       where: { user_id },
     });
     const key = this.kryptoService.rebuildKey(long, encryption.short);
+    const isValidKey = this.kryptoService.validateTestKey(key, encryption.test);
+    if (!isValidKey)
+      throw new BadUserInputException([
+        {
+          property: 'long',
+          value: long,
+          constraints: { invalidKey: 'Invalid encryption key' },
+        },
+      ]);
     return this.kryptoService.encrypt(input, key);
   }
 }

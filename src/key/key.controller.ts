@@ -49,6 +49,7 @@ export class KeyController {
   @ApiOkResponse({
     description: 'Keys',
     type: KeyEntity,
+    isArray: true,
   })
   findAll(
     @User() user: UserEntity,

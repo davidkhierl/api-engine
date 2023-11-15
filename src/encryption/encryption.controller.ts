@@ -1,6 +1,5 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { User } from '@/common/decorators/user.decorator';
-import { CreateEncryptionResponseDto } from '@/encryption/dto/create-encryption-response.dto';
 import { EncryptionEntity } from '@/encryption/entities/encryption.entity';
 import { UserEntity } from '@/user/entities/user.entity';
 import {
@@ -25,10 +24,11 @@ export class EncryptionController {
   @Post()
   @ApiCreatedResponse({
     description: 'Created encryption key',
-    type: CreateEncryptionResponseDto,
+    type: EncryptionEntity,
   })
-  create(@User() user: UserEntity): Promise<CreateEncryptionResponseDto> {
-    return this.encryptionService.create(user.id);
+  async create(@User() user: UserEntity): Promise<EncryptionEntity> {
+    const encryption = await this.encryptionService.create(user.id);
+    return new EncryptionEntity(encryption);
   }
 
   @Get()
@@ -38,7 +38,8 @@ export class EncryptionController {
   }
 
   @Delete()
-  remove(@User() user: UserEntity): Promise<EncryptionEntity> {
-    return this.encryptionService.remove(user.id);
+  async remove(@User() user: UserEntity): Promise<EncryptionEntity> {
+    const encryption = await this.encryptionService.remove(user.id);
+    return new EncryptionEntity(encryption);
   }
 }
