@@ -1,11 +1,12 @@
 import { AppModule } from '@/app.module';
 import { BadUserInputException } from '@/common/exceptions/bad-user-input.exception';
+import metadata from '@/metadata';
 import { PrismaClientExceptionFilter } from '@/prisma/prisma-client-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as session from 'express-session';
+import session from 'express-session';
 import connectPgSimple = require('connect-pg-simple');
 
 async function bootstrap() {
@@ -48,6 +49,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  await SwaggerModule.loadPluginMetadata(metadata);
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
