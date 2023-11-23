@@ -86,9 +86,19 @@ export class KeyService {
    * Encrypt property
    */
   private async _encryptProperty(input: string, long: string, user_id: string) {
-    const encryption = await this.prismaService.encryption.findUniqueOrThrow({
+    const encryption = await this.prismaService.encryption.findUnique({
       where: { user_id },
     });
+
+    if (!encryption)
+      throw new BadUserInputException([
+        {
+          property: 'long',
+          value: long,
+          constraints: { invalidKey: 'No encryption found' },
+        },
+      ]);
+
     const key = this.kryptoService.rebuildKey(long, encryption.short);
     const isValidKey = this.kryptoService.validateTestKey(key, encryption.test);
     if (!isValidKey)
